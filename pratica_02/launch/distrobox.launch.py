@@ -1,14 +1,20 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, RegisterEventHandler
+from launch.actions import ExecuteProcess, RegisterEventHandler, SetEnvironmentVariable
 from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
 from launch.substitutions import Command
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory('model_description')
+    pkg_share = get_package_share_directory('pratica_02')
+    urdf_path = os.path.join(pkg_share, 'urdf')
     urdf_file = os.path.join(pkg_share, 'urdf', 'vasco_robot.urdf')
+
+    set_gazebo_model_path = SetEnvironmentVariable(
+        name='GAZEBO_MODEL_PATH',
+        value= urdf_path + ':' + os.environ.get('GAZEBO_MODEL_PATH', '')
+    )
     
     # O segredo está aqui: o Xacro processa o ficheiro e resolve o $(find ...)
     robot_state_publisher_node = Node(
@@ -45,7 +51,14 @@ def generate_launch_description():
         arguments=["diff_cont"],
     )
 
+    teleop_node = ExecuteProcess(
+        cmd=['ros2', 'run', 'teleop_twist_keyboard', 'teleop_twist_keyboard'],
+        output='screen',
+        prefix='xterm -e'
+    )
+
     return LaunchDescription([
+        set_gazebo_model_path,
         robot_state_publisher_node,
         gazebo,
         spawn_entity,
@@ -55,4 +68,5 @@ def generate_launch_description():
                 on_exit=[load_joint_state_broadcaster, load_diff_drive_controller],
             )
         ),
+        teleop_node
     ])

@@ -29,6 +29,13 @@
         <box size="0.4 0.2 0.1"/>
       </geometry>
     </visual>
+    <visual name="vasco_visual">
+      <origin xyz="0 -0.55 -0.35" rpy="1.5 0 1.5"/>
+      <geometry>
+        <mesh filename="$(find pratica_02)/meshes/vasco.stl"
+              scale="0.005 0.005 0.005"/>
+      </geometry>
+    </visual>
   </link>
   <gazebo reference="base_link">
     <material>Gazebo/Black</material>
@@ -115,8 +122,8 @@
   </joint>
   <gazebo reference="caster_wheel">
     <material>Gazebo/Black</material>
-    <mu1>0.0</mu1>
-    <mu2>0.0</mu2>
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
   </gazebo>
 
   <!-- Roda Esquerda -->
@@ -147,6 +154,8 @@
   </joint>
   <gazebo reference="left_wheel">
     <material>Gazebo/White</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
   </gazebo>
 
   <!-- Roda Direita -->
@@ -177,6 +186,8 @@
   </joint>
   <gazebo reference="right_wheel">
     <material>Gazebo/White</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
   </gazebo>
 
   <!-- Configuração do gazebo_ros2_control -->
@@ -198,7 +209,11 @@
 
   <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <parameters>$(find model_description)/config/diff_drive.yaml</parameters>
+      <parameters>$(find pratica_02)/config/diff_drive.yaml</parameters>
+      <ros>
+        <remapping>/diff_cont/cmd_vel_unstamped:=/cmd_vel</remapping>
+        <remapping>diff_cont/odom:=odom</remapping>
+      </ros>
     </plugin>
   </gazebo>
 

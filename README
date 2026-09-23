@@ -1,0 +1,4 @@
+colcon build --packages-select pratica_02
+source install/setup.bash
+ros2 launch pratica_02 gazebo.launch.py ou
+ros2 launch pratica_02 distrobox.launch.py
