@@ -1,4 +1,6 @@
-colcon build --packages-select pratica_02
+## Comandos para executar no terminal
+
+colcon build --packages-select pratica_XX
 source install/setup.bash
-ros2 launch pratica_02 gazebo.launch.py ou
-ros2 launch pratica_02 distrobox.launch.py
+ros2 launch pratica_XX gazebo.launch.py ou
+ros2 launch pratica_XX distrobox.launch.py

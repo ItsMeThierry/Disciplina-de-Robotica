@@ -45,6 +45,12 @@ def generate_launch_description():
         arguments=["diff_cont"],
     )
 
+    teleop_node = ExecuteProcess(
+        cmd=['ros2', 'run', 'teleop_twist_keyboard', 'teleop_twist_keyboard'],
+        output='screen',
+        prefix='xterm -e'
+    )
+
     return LaunchDescription([
         robot_state_publisher_node,
         gazebo,
@@ -55,4 +61,5 @@ def generate_launch_description():
                 on_exit=[load_joint_state_broadcaster, load_diff_drive_controller],
             )
         ),
+        teleop_node
     ])
