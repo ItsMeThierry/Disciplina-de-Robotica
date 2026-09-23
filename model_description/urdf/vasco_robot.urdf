@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<robot name="vasco_robot">
+
+  <!-- Link base oculto para referenciar o centro no chão -->
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Chassis principal -->
+  <link name="base_link">
+    <!-- Inércia (Obrigatória no URDF) -->
+    <inertial>
+      <mass value="5.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.02" ixy="0.0" ixz="0.0" iyy="0.07" iyz="0.0" izz="0.08"/>
+    </inertial>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.4 0.2 0.1"/>
+      </geometry>
+    </collision>
+    
+    <!-- Corpo Preto -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.4 0.2 0.1"/>
+      </geometry>
+    </visual>
+
+    <!-- Faixa Diagonal Branca -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0.46"/>
+      <geometry>
+        <box size="0.41 0.04 0.102"/>
+      </geometry>
+    </visual>
+
+    <!-- Cruz Vermelha (Vertical e Horizontal) -->
+    <visual>
+      <origin xyz="0.08 0.05 0.055" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.02 0.08 0.01"/>
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.08 0.05 0.055" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.02 0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Roda de apoio (Caster) -->
+  <link name="caster_wheel">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="caster_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_wheel"/>
+    <origin xyz="-0.15 0 -0.05" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Roda Esquerda -->
+  <link name="left_wheel">
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.003" ixy="0.0" ixz="0.0" iyy="0.003" iyz="0.0" izz="0.005"/>
+    </inertial>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+      <geometry>
+        <cylinder radius="0.1" length="0.05"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+      <geometry>
+        <cylinder radius="0.1" length="0.05"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="0.1 0.13 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- Roda Direita -->
+  <link name="right_wheel">
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.003" ixy="0.0" ixz="0.0" iyy="0.003" iyz="0.0" izz="0.005"/>
+    </inertial>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+      <geometry>
+        <cylinder radius="0.1" length="0.05"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+      <geometry>
+        <cylinder radius="0.1" length="0.05"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="0.1 -0.13 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- Cores e Atrito para o simulador Gazebo -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  
+  <gazebo reference="left_wheel">
+    <material>Gazebo/White</material>
+  </gazebo>
+  
+  <gazebo reference="right_wheel">
+    <material>Gazebo/White</material>
+  </gazebo>
+  
+  <!-- Remove atrito do caster para que o robô deslize e não tombe -->
+  <gazebo reference="caster_wheel">
+    <material>Gazebo/Black</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+</robot>
