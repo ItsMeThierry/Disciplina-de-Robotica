@@ -19,7 +19,11 @@ add_executable(pose_controller src/pose_controller.cpp)
 ament_target_dependencies(pose_controller
   rclcpp geometry_msgs nav_msgs tf2 tf2_geometry_msgs tf2_ros)
 
-install(TARGETS pose_controller
+add_executable(mission_node src/mission_node.cpp)
+ament_target_dependencies(mission_node
+  rclcpp geometry_msgs nav_msgs tf2 tf2_geometry_msgs tf2_ros)
+
+install(TARGETS pose_controller mission_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(

@@ -1,0 +1,6 @@
+mission_node:
+  ros__parameters:
+    tolerance_xy: 0.05
+    waypoints_x: [1.0, 2.0, 0.0]
+    waypoints_y: [1.0, 0.0, 0.0]
+    waypoints_theta: [0.0, 1.57, 0.0]

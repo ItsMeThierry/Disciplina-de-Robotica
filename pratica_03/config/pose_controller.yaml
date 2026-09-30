@@ -1,11 +1,11 @@
 pose_controller:
   ros__parameters:
-    kp_linear: 3.0
-    ki_linear: 0.0
-    kd_linear: 0.0
-    kp_angular: 3.0
-    ki_angular: 0.0
-    kd_angular: 0.1
+    kp_linear: 0.6
+    ki_linear: 0.001
+    kd_linear: 0.08
+    kp_angular: 1.8
+    ki_angular: 0.002
+    kd_angular: 0.12
     max_linear_vel: 0.6
     max_angular_vel: 2.0
     goal_tolerance_xy: 0.05

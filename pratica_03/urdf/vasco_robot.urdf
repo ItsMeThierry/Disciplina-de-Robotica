@@ -122,8 +122,8 @@
   </joint>
   <gazebo reference="caster_wheel">
     <material>Gazebo/Black</material>
-    <mu1>0.5</mu1>
-    <mu2>0.5</mu2>
+    <mu1>0.001</mu1>
+    <mu2>0.001</mu2>
   </gazebo>
 
   <!-- Roda Esquerda -->
