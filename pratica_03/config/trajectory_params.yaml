@@ -1,0 +1,10 @@
+trajectory_node:
+  ros__parameters:
+    A: 1.5
+    B: 1.5
+    omega: 0.2
+    K_x: 2.0
+    K_y: 2.0
+    K_theta: 1.5
+    K_ff: 1.0
+    is_open_loop: false

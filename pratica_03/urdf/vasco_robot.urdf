@@ -122,8 +122,12 @@
   </joint>
   <gazebo reference="caster_wheel">
     <material>Gazebo/Black</material>
-    <mu1>0.001</mu1>
-    <mu2>0.001</mu2>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>1.0</maxVel>
   </gazebo>
 
   <!-- Roda Esquerda -->
@@ -131,7 +135,8 @@
     <inertial>
       <mass value="1.0"/>
       <origin xyz="0 0 0"/>
-      <inertia ixx="0.003" ixy="0.0" ixz="0.0" iyy="0.003" iyz="0.0" izz="0.005"/>
+      <!-- Iyy corrigido para ser o eixo principal -->
+      <inertia ixx="0.003" ixy="0.0" ixz="0.0" iyy="0.005" iyz="0.0" izz="0.003"/>
     </inertial>
     <collision>
       <origin xyz="0 0 0" rpy="1.5707 0 0"/>
@@ -154,8 +159,8 @@
   </joint>
   <gazebo reference="left_wheel">
     <material>Gazebo/White</material>
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
   </gazebo>
 
   <!-- Roda Direita -->
@@ -163,7 +168,8 @@
     <inertial>
       <mass value="1.0"/>
       <origin xyz="0 0 0"/>
-      <inertia ixx="0.003" ixy="0.0" ixz="0.0" iyy="0.003" iyz="0.0" izz="0.005"/>
+      <!-- Iyy corrigido para ser o eixo principal -->
+      <inertia ixx="0.003" ixy="0.0" ixz="0.0" iyy="0.005" iyz="0.0" izz="0.003"/>
     </inertial>
     <collision>
       <origin xyz="0 0 0" rpy="1.5707 0 0"/>
@@ -186,8 +192,8 @@
   </joint>
   <gazebo reference="right_wheel">
     <material>Gazebo/White</material>
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
   </gazebo>
 
   <!-- Configuração do gazebo_ros2_control -->

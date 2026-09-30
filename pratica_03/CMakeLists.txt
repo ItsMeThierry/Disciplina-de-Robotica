@@ -38,4 +38,14 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+# Instalar scripts Python
+install(PROGRAMS
+  scripts/trajectory_node.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Instalar pasta de config
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
 ament_package()
