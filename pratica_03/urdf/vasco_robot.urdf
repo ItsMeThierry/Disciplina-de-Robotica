@@ -32,7 +32,7 @@
     <visual name="vasco_visual">
       <origin xyz="0 -0.55 -0.35" rpy="1.5 0 1.5"/>
       <geometry>
-        <mesh filename="$(find pratica_02)/meshes/vasco.stl"
+        <mesh filename="$(find pratica_03)/meshes/vasco.stl"
               scale="0.005 0.005 0.005"/>
       </geometry>
     </visual>
@@ -209,11 +209,7 @@
 
   <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <parameters>$(find pratica_02)/config/diff_drive.yaml</parameters>
-      <ros>
-        <remapping>/diff_cont/cmd_vel_unstamped:=/cmd_vel</remapping>
-        <remapping>diff_cont/odom:=odom</remapping>
-      </ros>
+      <parameters>$(find pratica_03)/config/diff_drive.yaml</parameters>
     </plugin>
   </gazebo>
 

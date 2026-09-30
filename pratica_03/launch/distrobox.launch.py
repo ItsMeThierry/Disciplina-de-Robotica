@@ -51,13 +51,6 @@ def generate_launch_description():
         arguments=["diff_cont"],
     )
 
-    node = Node(
-        package='pratica_03',
-        executable='no',
-        name='no',
-        output='screen',
-    )
-
     return LaunchDescription([
         set_gazebo_model_path,
         robot_state_publisher_node,
@@ -66,7 +59,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=spawn_entity,
-                on_exit=[load_joint_state_broadcaster, load_diff_drive_controller, node],
+                on_exit=[load_joint_state_broadcaster, load_diff_drive_controller],
             )
         )
     ])

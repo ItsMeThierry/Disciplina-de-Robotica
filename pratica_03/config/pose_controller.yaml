@@ -1,0 +1,15 @@
+pose_controller:
+  ros__parameters:
+    kp_linear: 3.0
+    ki_linear: 0.0
+    kd_linear: 0.0
+    kp_angular: 3.0
+    ki_angular: 0.0
+    kd_angular: 0.1
+    max_linear_vel: 0.6
+    max_angular_vel: 2.0
+    goal_tolerance_xy: 0.05
+    goal_tolerance_theta: 0.05
+    odom_topic: /diff_cont/odom
+    cmd_vel_topic: /diff_cont/cmd_vel_unstamped
+    goal_topic: /goal_pose

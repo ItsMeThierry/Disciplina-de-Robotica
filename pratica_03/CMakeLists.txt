@@ -9,12 +9,18 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_ros REQUIRED)
 
-add_executable(no src/no.cpp)
-ament_target_dependencies(no rclcpp)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
-install(TARGETS no
-  DESTINATION lib/${PROJECT_NAME}
-)
+add_executable(pose_controller src/pose_controller.cpp)
+ament_target_dependencies(pose_controller
+  rclcpp geometry_msgs nav_msgs tf2 tf2_geometry_msgs tf2_ros)
+
+install(TARGETS pose_controller
+  DESTINATION lib/${PROJECT_NAME})
 
 install(
   DIRECTORY launch urdf config meshes
