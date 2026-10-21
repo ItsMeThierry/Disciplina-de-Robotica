@@ -1,32 +1,118 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import (
+    ExecuteProcess, RegisterEventHandler, SetEnvironmentVariable, TimerAction
+)
+from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import Command
+
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('pratica_03')
+    urdf_path = os.path.join(pkg_share, 'urdf')
+    urdf_file = os.path.join(pkg_share, 'urdf', 'vasco_robot.urdf')
+    pid_config = os.path.join(pkg_share, 'config', 'pid_gains.yaml')
+    mission_config = os.path.join(pkg_share, 'config', 'mission.yaml')
 
-    # Caminho do YAML de waypoints
-    waypoints_yaml = os.path.join(pkg_share, 'config', 'waypoints.yaml')
-
-    # Inclui o launch do pose_controller
-    pose_controller_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pkg_share, 'launch', 'pose_controller.launch.py')
-        )
+    set_gazebo_model_path = SetEnvironmentVariable(
+        name='GAZEBO_MODEL_PATH',
+        value=urdf_path + ':' + os.environ.get('GAZEBO_MODEL_PATH', '')
     )
 
-    mission_node = Node(
-        package='pratica_03',
-        executable='mission_node',
-        name='mission_node',
+    robot_state_publisher_node = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
         output='screen',
-        parameters=[waypoints_yaml]
+        parameters=[{
+            'robot_description': Command(['xacro ', urdf_file]),
+            'use_sim_time': True
+        }]
+    )
+
+    gazebo = ExecuteProcess(
+        cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so',
+             '-s', 'libgazebo_ros_factory.so'],
+        output='screen',
+        sigterm_timeout='15.0',
+        sigkill_timeout='10.0',
+    )
+
+    spawn_entity = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=['-entity', 'vasco_robot', '-topic', 'robot_description',
+                   '-x', '0', '-y', '0', '-z', '0.2'],
+        output='screen'
+    )
+
+    load_joint_state_broadcaster = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster"],
+    )
+
+    load_diff_drive_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["diff_cont"],
+    )
+
+    pose_controller_node = Node(
+        package='pratica_03',
+        executable='pose_controller_node',
+        name='pose_controller_node',
+        output='screen',
+        parameters=[
+            pid_config,
+            {'use_sim_time': True}
+        ],
+        remappings=[
+            ('/odom',    '/diff_cont/odom'),
+            ('/cmd_vel', '/diff_cont/cmd_vel_unstamped'),
+        ]
+    )
+
+    # ---------- NOVO: seguidor de missão ----------
+    mission_follower_node = Node(
+        package='pratica_03',
+        executable='mission_follower_node',
+        name='mission_follower_node',
+        output='screen',
+        parameters=[
+            {'mission_file': mission_config},
+            {'use_sim_time': True},
+        ],
+        remappings=[
+            # Odometria do diff_drive_controller (mesma usada pelo pose_controller)
+            ('/odom', '/diff_cont/odom'),
+            # Envia goals para o controlador de pose
+            ('/goal_pose', '/goal_pose'),
+        ]
     )
 
     return LaunchDescription([
-        pose_controller_launch,
-        mission_node
+        set_gazebo_model_path,
+        robot_state_publisher_node,
+        gazebo,
+        spawn_entity,
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=spawn_entity,
+                on_exit=[load_joint_state_broadcaster, load_diff_drive_controller],
+            )
+        ),
+        # Sobe o controlador de pose 5s depois do início.
+        TimerAction(
+            period=5.0,
+            actions=[pose_controller_node],
+        ),
+        # Sobe o seguidor de missão 1s depois do pose_controller,
+        # garantindo que o publisher /goal_pose já exista
+        # (evita "goal perdido" se o YAML tiver só 1 waypoint).
+        TimerAction(
+            period=6.0,
+            actions=[mission_follower_node],
+        ),
     ])

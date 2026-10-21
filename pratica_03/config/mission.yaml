@@ -1,0 +1,22 @@
+# mission.yaml
+mission:
+  position_tolerance: 0.2     # metros
+  yaw_tolerance: 0.15          # radianos
+  waypoint_timeout: 30.0
+  dwell_time: 0.5
+  frame_id: "odom"
+  loop: false
+
+  waypoints:
+    - name: "ponto_1"
+      position: {x: 1.0, y: 0.0, z: 0.0}
+      orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}   # yaw = 0
+    - name: "ponto_2"
+      position: {x: 1.0, y: 1.0, z: 0.0}
+      orientation: {x: 0.0, y: 0.0, z: 0.7071068, w: 0.7071068}
+    - name: "ponto_3"
+      position: {x: 0.0, y: 1.0, z: 0.0}
+      orientation: {x: 0.0, y: 0.0, z: 1.0, w: 0.0}   # yaw = 180°
+    - name: "ponto_4"
+      position: {x: 0.0, y: 0.0, z: 0.0}
+      orientation: {x: 0.0, y: 0.0, z: -0.7071068, w: 0.7071068} 
