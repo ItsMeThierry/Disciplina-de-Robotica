@@ -1,16 +1,24 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, RegisterEventHandler
+from launch.actions import (
+    ExecuteProcess, RegisterEventHandler, SetEnvironmentVariable, TimerAction
+)
 from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
 from launch.substitutions import Command
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('pratica_03')
+    urdf_path = os.path.join(pkg_share, 'urdf')
     urdf_file = os.path.join(pkg_share, 'urdf', 'vasco_robot.urdf')
-    
-    # O segredo está aqui: o Xacro processa o ficheiro e resolve o $(find ...)
+    pid_config = os.path.join(pkg_share, 'config', 'trajectory_params.yaml')
+
+    set_gazebo_model_path = SetEnvironmentVariable(
+        name='GAZEBO_MODEL_PATH',
+        value= urdf_path + ':' + os.environ.get('GAZEBO_MODEL_PATH', '')
+    )
+
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -20,16 +28,22 @@ def generate_launch_description():
             'use_sim_time': True
         }]
     )
-    
+
     gazebo = ExecuteProcess(
-        cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so', '-s', 'libgazebo_ros_factory.so'],
-        output='screen'
+    cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so',
+         '-s', 'libgazebo_ros_factory.so'],
+        output='screen',
+        # SIGINT tem 15s para encerrar, depois SIGTERM, depois SIGKILL
+        # rolou problema comigo :)
+        sigterm_timeout='15.0',
+        sigkill_timeout='10.0',
     )
-    
+
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-entity', 'vasco_robot', '-topic', 'robot_description', '-x', '0', '-y', '0', '-z', '0.2'],
+        arguments=['-entity', 'vasco_robot', '-topic', 'robot_description',
+                   '-x', '0', '-y', '0', '-z', '0.1'],
         output='screen'
     )
 
@@ -45,13 +59,23 @@ def generate_launch_description():
         arguments=["diff_cont"],
     )
 
-    teleop_node = ExecuteProcess(
-        cmd=['ros2', 'run', 'teleop_twist_keyboard', 'teleop_twist_keyboard'],
+    trajectory_controller_node = Node(
+        package='pratica_03',
+        executable='trajectory_controller_node',
+        name='trajectory_controller_node',
         output='screen',
-        prefix='xterm -e'
+        parameters=[
+            pid_config,
+            {'use_sim_time': True}
+        ],
+        remappings=[
+            ('/odom',    '/diff_cont/odom'),
+            ('/cmd_vel', '/diff_cont/cmd_vel_unstamped'),
+        ]
     )
 
     return LaunchDescription([
+        set_gazebo_model_path,
         robot_state_publisher_node,
         gazebo,
         spawn_entity,
@@ -61,5 +85,10 @@ def generate_launch_description():
                 on_exit=[load_joint_state_broadcaster, load_diff_drive_controller],
             )
         ),
-        teleop_node
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_diff_drive_controller,
+                on_exit=[trajectory_controller_node],
+            )
+        ),
     ])
