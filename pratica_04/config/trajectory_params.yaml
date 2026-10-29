@@ -1,5 +1,7 @@
 trajectory_controller_node:
   ros__parameters:
+    use_sim_time: true        # mesmo relógio do Gazebo / diff_drive_controller
+
     trajectory:
       A: 1.0
       B: 2.0
@@ -7,16 +9,38 @@ trajectory_controller_node:
 
     control:
       mode: "closed_loop"
-      Kff: 1.0        
+      Kff: 1.0
+
+    sensors:
+      gps_topic: "/gps/fix"
+      imu_topic: "/imu/data"
+      timeout: 0.5
+
+    gps:
+      origin_mode: "first_fix"   # "first_fix" ou "fixed"
+      origin_lat: 0.0
+      origin_lon: 0.0
+      origin_alt: 0.0
+      world_heading_deg: 180.0
+      initial_x: 0.0
+      initial_y: 0.0
+      lever_arm_x: 0.0
+      lever_arm_y: 0.0
+
+    imu:
+      yaw_offset: 0.0
+
+    debug:
+      compare_ground_truth: true
 
     kp_x: 5.0
     ki_x: 0.0
     kd_x: 0.0
 
-    kp_y: 6.0
+    kp_y: 4.0
     ki_y: 0.2
-    kd_y: 1.0
+    kd_y: 0.0
 
     kp_theta: 6.0
     ki_theta: 0.0
-    kd_theta: 0.4
+    kd_theta: 0.2

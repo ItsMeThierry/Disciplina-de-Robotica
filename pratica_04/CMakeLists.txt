@@ -14,10 +14,11 @@ find_package(nav_msgs REQUIRED)
 find_package(control_toolbox REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 add_executable(trajectory_controller_node src/trajectory_controller_node.cpp)
 ament_target_dependencies(trajectory_controller_node
-  rclcpp geometry_msgs nav_msgs tf2 tf2_ros control_toolbox)
+  rclcpp geometry_msgs nav_msgs tf2 tf2_ros control_toolbox sensor_msgs)
 
 install(TARGETS trajectory_controller_node
   DESTINATION lib/${PROJECT_NAME})
