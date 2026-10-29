@@ -12,7 +12,7 @@ def generate_launch_description():
     pkg_share = get_package_share_directory('pratica_03')
     urdf_path = os.path.join(pkg_share, 'urdf')
     urdf_file = os.path.join(pkg_share, 'urdf', 'vasco_robot.urdf')
-    pid_config = os.path.join(pkg_share, 'config', 'pid_gains.yaml')
+    pid_config = os.path.join(pkg_share, 'config', 'pose_gains.yaml')
 
     set_gazebo_model_path = SetEnvironmentVariable(
         name='GAZEBO_MODEL_PATH',
@@ -44,7 +44,7 @@ def generate_launch_description():
         package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=['-entity', 'vasco_robot', '-topic', 'robot_description',
-                   '-x', '0', '-y', '0', '-z', '0.2'],
+                   '-x', '0', '-y', '0', '-z', '0.1'],
         output='screen'
     )
 

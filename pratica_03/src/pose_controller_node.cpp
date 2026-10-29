@@ -40,9 +40,9 @@ public:
             throw;
         }
 
-        pid_x_.initPid(kp_x, ki_x, kd_x, 0.0, 0.0, false);
-        pid_y_.initPid(kp_y, ki_y, kd_y, 0.0, 0.0, false);
-        pid_theta_.initPid(kp_t, ki_t, kd_t, 0.0, 0.0, false);
+        pid_x_.initPid(kp_x, ki_x, kd_x, 0.5, -0.5, true);
+        pid_y_.initPid(kp_y, ki_y, kd_y, 0.5, -0.5, true);
+        pid_theta_.initPid(kp_t, ki_t, kd_t, 0.3, -0.3, true);
 
         RCLCPP_INFO(this->get_logger(), "PID X     -> Kp=%.3f Ki=%.3f Kd=%.3f", kp_x, ki_x, kd_x);
         RCLCPP_INFO(this->get_logger(), "PID Y     -> Kp=%.3f Ki=%.3f Kd=%.3f", kp_y, ki_y, kd_y);
@@ -50,7 +50,7 @@ public:
 
         // Feedback (pose atual) e referência (pose desejada)
         odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-            "/odom", 10, std::bind(&PoseControllerNode::odom_callback, this, std::placeholders::_1));
+            "/robo_vascaino/ground_truth/pose", 10, std::bind(&PoseControllerNode::odom_callback, this, std::placeholders::_1));
         goal_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
             "/goal_pose", 10, std::bind(&PoseControllerNode::goal_callback, this, std::placeholders::_1));
 
@@ -95,7 +95,7 @@ private:
     {
         if (!has_odom_ || !has_goal_) return;
 
-        // ---------- Erros no frame do mundo ----------
+        // ---------- 1) Erros no frame do mundo ----------
         double ex = target_pose_.position.x - current_pose_.position.x;
         double ey = target_pose_.position.y - current_pose_.position.y;
 
@@ -103,32 +103,36 @@ private:
         double yaw_current = yaw_from_quaternion(current_pose_.orientation);
         double eth = wrap_to_pi(yaw_target - yaw_current);
 
-        // ---------- dt ----------
-        rclcpp::Time now = this->now();
-        uint64_t dt_ns = (now - last_time_).nanoseconds();
-        last_time_ = now;
-        if (dt_ns <= 0) return;
-
-        // ---------- PIDs: velocidades desejadas no frame do mundo ----------
-        double vx_world = pid_x_.computeCommand(ex, dt_ns);
-        double vy_world = pid_y_.computeCommand(ey, dt_ns);
-        double wz_world = pid_theta_.computeCommand(eth, dt_ns);
-
-        // ---------- Converter velocidades do mundo -> frame do robô ----------
-        // Cinemática: [vx_robot, vy_robot] = R(-theta) * [vx_world, vy_world]
+        // ---------- 2) Rotacionar o erro para o frame do robô ----------
+        // [e_x^b, e_y^b]^T = R(-theta) * [e_x, e_y]^T
         double c = std::cos(yaw_current);
         double s = std::sin(yaw_current);
 
-        double vx_robot =  vx_world * c + vy_world * s;
-        double vy_robot = -vx_world * s + vy_world * c;  // descartado (robô diferencial)
+        double ex_b =  ex * c + ey * s;
+        double ey_b = -ex * s + ey * c;
+        double eth_b = eth;   // invariante à rotação em Z
 
-        (void)vy_robot;  // só para silenciar o -Wunused-variable, não vai ao cmd_vel
+        // ---------- dt ----------
+        rclcpp::Time now = this->now();
+        uint64_t dt_ns = (now - last_time_).nanoseconds();
 
-        // ---------- Publicar comando compatível com diff_drive ----------
+        last_time_ = now;
+        if (dt_ns <= 0) return;
+
+        // ---------- 3) PIDs no frame do robô ----------
+        // v_d  = PID(e_x^b)
+        // omega_d = PID(e_y^b) + PID(e_theta^b)
+        double v_cmd       = pid_x_.computeCommand(ex_b, dt_ns);
+        double omega_y     = pid_y_.computeCommand(ey_b, dt_ns);
+        double omega_theta = pid_theta_.computeCommand(eth_b, dt_ns);
+
+        double omega_cmd = omega_y + omega_theta;
+
+        // ---------- 4) Publicar comando compatível com diff_drive ----------
         auto twist = geometry_msgs::msg::Twist();
-        twist.linear.x  = vx_robot;
+        twist.linear.x  = v_cmd;
         twist.linear.y  = 0.0;
-        twist.angular.z = wz_world;
+        twist.angular.z = omega_cmd;
         cmd_pub_->publish(twist);
     }
 

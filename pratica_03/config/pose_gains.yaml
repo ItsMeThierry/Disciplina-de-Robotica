@@ -1,0 +1,13 @@
+pose_controller_node:    
+    ros__parameters: 
+        kp_x: 1.0
+        ki_x: 0.0
+        kd_x: 0.0
+
+        kp_y: 0.7
+        ki_y: 0.05
+        kd_y: 0.5
+
+        kp_theta: 0.7
+        ki_theta: 0.0
+        kd_theta: 0.2

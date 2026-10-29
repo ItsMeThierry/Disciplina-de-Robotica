@@ -13,6 +13,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(control_toolbox REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
@@ -25,7 +26,14 @@ ament_target_dependencies(mission_follower_node
   rclcpp geometry_msgs nav_msgs tf2 tf2_ros)
 target_link_libraries(mission_follower_node yaml-cpp)
 
-install(TARGETS pose_controller_node mission_follower_node
+add_executable(trajectory_controller_node src/trajectory_controller_node.cpp)
+ament_target_dependencies(trajectory_controller_node
+  rclcpp geometry_msgs nav_msgs tf2 tf2_ros control_toolbox)
+
+install(TARGETS
+    pose_controller_node
+    mission_follower_node
+    trajectory_controller_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(

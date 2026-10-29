@@ -1,0 +1,22 @@
+trajectory_controller_node:
+  ros__parameters:
+    trajectory:
+      A: 1.0
+      B: 2.0
+      Omega: 0.55
+
+    control:
+      mode: "closed_loop"
+      Kff: 1.0        
+
+    kp_x: 5.0
+    ki_x: 0.0
+    kd_x: 0.0
+
+    kp_y: 6.0
+    ki_y: 0.2
+    kd_y: 1.0
+
+    kp_theta: 6.0
+    ki_theta: 0.0
+    kd_theta: 0.4
