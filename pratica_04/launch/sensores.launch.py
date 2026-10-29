@@ -8,16 +8,15 @@ from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
 from launch.substitutions import Command
 
-
 def generate_launch_description():
     pkg_share = get_package_share_directory('pratica_04')
     urdf_path = os.path.join(pkg_share, 'urdf')
     urdf_file = os.path.join(pkg_share, 'urdf', 'vasco_robot.urdf')
-    pid_config = os.path.join(pkg_share, 'config', 'pid_gains.yaml')
+    pid_config = os.path.join(pkg_share, 'config', 'trajectory_params.yaml')
 
     set_gazebo_model_path = SetEnvironmentVariable(
         name='GAZEBO_MODEL_PATH',
-        value=urdf_path + ':' + os.environ.get('GAZEBO_MODEL_PATH', '')
+        value= urdf_path + ':' + os.environ.get('GAZEBO_MODEL_PATH', '')
     )
 
     robot_state_publisher_node = Node(
@@ -31,9 +30,11 @@ def generate_launch_description():
     )
 
     gazebo = ExecuteProcess(
-        cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so',
-             '-s', 'libgazebo_ros_factory.so'],
+    cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so',
+         '-s', 'libgazebo_ros_factory.so'],
         output='screen',
+        # SIGINT tem 15s para encerrar, depois SIGTERM, depois SIGKILL
+        # rolou problema comigo :)
         sigterm_timeout='15.0',
         sigkill_timeout='10.0',
     )
@@ -42,7 +43,7 @@ def generate_launch_description():
         package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=['-entity', 'vasco_robot', '-topic', 'robot_description',
-                   '-x', '0', '-y', '0', '-z', '0.2'],
+                   '-x', '0', '-y', '0', '-z', '0.1'],
         output='screen'
     )
 
@@ -58,10 +59,10 @@ def generate_launch_description():
         arguments=["diff_cont"],
     )
 
-    pose_controller_node = Node(
+    trajectory_controller_node = Node(
         package='pratica_04',
-        executable='pose_controller_node',
-        name='pose_controller_node',
+        executable='trajectory_controller_node',
+        name='trajectory_controller_node',
         output='screen',
         parameters=[
             pid_config,
@@ -84,8 +85,10 @@ def generate_launch_description():
                 on_exit=[load_joint_state_broadcaster, load_diff_drive_controller],
             )
         ),
-        TimerAction(
-            period=5.0,
-            actions=[pose_controller_node],
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_diff_drive_controller,
+                on_exit=[trajectory_controller_node],
+            )
         ),
     ])

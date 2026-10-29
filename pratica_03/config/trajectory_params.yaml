@@ -3,7 +3,7 @@ trajectory_controller_node:
     trajectory:
       A: 1.0
       B: 2.0
-      Omega: 0.55
+      Omega: 0.5
 
     control:
       mode: "closed_loop"

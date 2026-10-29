@@ -15,11 +15,11 @@ find_package(control_toolbox REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 
-add_executable(pose_controller_node src/pose_controller_node.cpp)
-ament_target_dependencies(pose_controller_node
+add_executable(trajectory_controller_node src/trajectory_controller_node.cpp)
+ament_target_dependencies(trajectory_controller_node
   rclcpp geometry_msgs nav_msgs tf2 tf2_ros control_toolbox)
 
-install(TARGETS pose_controller_node
+install(TARGETS trajectory_controller_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(
